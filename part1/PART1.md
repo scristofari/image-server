@@ -7,12 +7,7 @@ There are all the libraries needed to build the project.
 
 In the future, we will just have a binarie, so the alpine
 alone will be necessary.
-
-## Dependency management tool
-
-As dependency management tool, we will use the new
-golang tool "dep" which will ensure all the dependencies 
-of the project.
+See Part 6, for multi-staging docker.
 
 ## Makefile
 
