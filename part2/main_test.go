@@ -16,6 +16,7 @@ var (
 
 func init() {
 	server = httptest.NewServer(handlers())
+	outputDir = "tests/out"
 }
 
 func TestUploadImage(t *testing.T) {
@@ -24,10 +25,10 @@ func TestUploadImage(t *testing.T) {
 		t.Error(err.Error())
 	}
 
-	r, _ := http.NewRequest("POST", server.URL+"/upload", body)
+	r, _ := http.NewRequest("POST", "/upload", body)
 	r.Header.Set("Content-Type", contentType)
-
 	w := httptest.NewRecorder()
+
 	uploadHandler(w, r)
 
 	if w.Code != http.StatusCreated {
@@ -36,8 +37,24 @@ func TestUploadImage(t *testing.T) {
 	}
 }
 
+func TestGetImage(t *testing.T) {
+	r, err := http.NewRequest("GET", server.URL+"/images/golang.png", nil)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+
+	w, err := http.DefaultClient.Do(r)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if w.StatusCode != http.StatusOK {
+		t.Errorf("Expected %d, get %d", http.StatusOK, w.StatusCode)
+	}
+}
+
 func loadFormFile(path string) (*bytes.Buffer, string, error) {
-	file, err := os.Open("tests/golang.png")
+	file, err := os.Open("tests/in/golang.png")
 	if err != nil {
 		return nil, "", err
 	}
