@@ -19,37 +19,13 @@ func init() {
 }
 
 func TestUploadImage(t *testing.T) {
-	file, err := os.Open("tests/golang.png")
+	body, contentType, err := loadFormFile("tests/golang.png")
 	if err != nil {
 		t.Error(err.Error())
-	}
-	defer file.Close()
-
-	fileContents, err := ioutil.ReadAll(file)
-	if err != nil {
-		t.Error(err.Error())
-	}
-	fi, err := file.Stat()
-	if err != nil {
-		t.Error(err.Error())
-	}
-
-	body := new(bytes.Buffer)
-	bw := multipart.NewWriter(body)
-
-	fw, err := bw.CreateFormFile("image", fi.Name())
-	if err != nil {
-		t.Error("failed to add file")
-	}
-	fw.Write(fileContents)
-
-	err = bw.Close()
-	if err != nil {
-		t.Error("failed to close the reader")
 	}
 
 	r, _ := http.NewRequest("POST", server.URL+"/upload", body)
-	r.Header.Set("Content-Type", bw.FormDataContentType())
+	r.Header.Set("Content-Type", contentType)
 
 	w := httptest.NewRecorder()
 	uploadHandler(w, r)
@@ -58,4 +34,37 @@ func TestUploadImage(t *testing.T) {
 		t.Errorf("Expected %d, get %d", http.StatusCreated, w.Code)
 		t.Error(w.Body)
 	}
+}
+
+func loadFormFile(path string) (*bytes.Buffer, string, error) {
+	file, err := os.Open("tests/golang.png")
+	if err != nil {
+		return nil, "", err
+	}
+	defer file.Close()
+
+	fileContents, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, "", err
+	}
+	fi, err := file.Stat()
+	if err != nil {
+		return nil, "", err
+	}
+
+	body := new(bytes.Buffer)
+	bw := multipart.NewWriter(body)
+
+	fw, err := bw.CreateFormFile("image", fi.Name())
+	if err != nil {
+		return nil, "", err
+	}
+	fw.Write(fileContents)
+
+	err = bw.Close()
+	if err != nil {
+		return nil, "", err
+	}
+
+	return body, bw.FormDataContentType(), nil
 }
