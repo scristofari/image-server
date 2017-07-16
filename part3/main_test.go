@@ -10,12 +10,7 @@ import (
 	"testing"
 )
 
-var (
-	server *httptest.Server
-)
-
 func init() {
-	server = httptest.NewServer(handlers())
 	outputDir = "tests/out"
 }
 
@@ -38,18 +33,30 @@ func TestUploadImage(t *testing.T) {
 }
 
 func TestGetImage(t *testing.T) {
-	r, err := http.NewRequest("GET", server.URL+"/images/golang.png", nil)
+	r, err := http.NewRequest("GET", "http://localhost/images/golang.png?r=50x0", nil)
 	if err != nil {
 		t.Errorf(err.Error())
 	}
+	w := httptest.NewRecorder()
 
-	w, err := http.DefaultClient.Do(r)
-	if err != nil {
-		t.Error(err)
+	imageHandler(w, r)
+
+	if w.Code != http.StatusOK {
+		t.Errorf("Expected %d, get %d", http.StatusOK, w.Code)
 	}
+}
 
-	if w.StatusCode != http.StatusOK {
-		t.Errorf("Expected %d, get %d", http.StatusOK, w.StatusCode)
+func TestGetImageTooManyParameters(t *testing.T) {
+	r, err := http.NewRequest("GET", "http://localhost/images/golang.png?r=23x0&t=23x34", nil)
+	if err != nil {
+		t.Errorf(err.Error())
+	}
+	w := httptest.NewRecorder()
+
+	imageHandler(w, r)
+
+	if w.Code != http.StatusBadRequest {
+		t.Errorf("Expected %d, get %d", http.StatusBadRequest, w.Code)
 	}
 }
 

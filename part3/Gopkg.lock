@@ -2,12 +2,6 @@
 
 
 [[projects]]
-  name = "github.com/disintegration/imaging"
-  packages = ["."]
-  revision = "ac27d1805a555e1754fa177216ee07f4e63c30b5"
-  version = "v1.1.0"
-
-[[projects]]
   name = "github.com/gorilla/context"
   packages = ["."]
   revision = "1ea25387ff6f684839d82767c1733ff4d4d15d0a"
@@ -21,13 +15,13 @@
 
 [[projects]]
   branch = "master"
-  name = "golang.org/x/image"
-  packages = ["bmp","tiff","tiff/lzw"]
-  revision = "426cfd8eeb6e08ab1932954e09e3c2cb2bc6e36d"
+  name = "github.com/nfnt/resize"
+  packages = ["."]
+  revision = "891127d8d1b52734debe1b3c3d7e747502b6c366"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ec90e443755c7b33931395efe1e863158370fc54872844bc4a752ebf4ec38585"
+  inputs-digest = "e32868a4964493f29d9721092ed0d05a1af3268db81a62965b176ceec2e46191"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -1,5 +1,5 @@
 build:
-	docker build -t 2-image-server .
+	docker build -t 3-image-server .
 
 dev: build
 	docker run -it \
