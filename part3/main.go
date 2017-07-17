@@ -21,7 +21,7 @@ const (
 )
 
 var (
-	outputDir = "tests/out"
+	outputDir = "images"
 )
 
 func main() {
@@ -40,7 +40,7 @@ func handlers() *mux.Router {
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	// Prevent from too large uploaded file
+	// Prevent from too large uploaded file / PART 4
 	r.Body = http.MaxBytesReader(w, r.Body, 5*mb)
 
 	image, header, err := r.FormFile("image")
@@ -49,11 +49,6 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer image.Close()
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
 	f, err := os.OpenFile(outputDir+"/"+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
@@ -70,6 +65,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	/** vars empty, in test case, we do not execute the router */
 	hash := strings.Split(r.URL.Path, "/")
 	filename := outputDir + "/" + hash[2]
+
 	file, err := os.Open(filename)
 	if err != nil {
 		http.Error(w, "failed to open file, "+err.Error(), http.StatusBadRequest)
@@ -88,13 +84,12 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	var i image.Image
 	switch q.t {
 	case "r":
-		i = resize.Resize(q.s.width, q.s.height, img, resize.Lanczos2)
+		i = resize.Resize(q.p.width, q.p.height, img, resize.Lanczos2)
 	case "t":
-		i = resize.Thumbnail(q.s.width, q.s.height, img, resize.Lanczos2)
+		i = resize.Thumbnail(q.p.width, q.p.height, img, resize.Lanczos2)
 	}
 
 	w.Header().Set("Cache-Control", "max-age=3600")
@@ -103,9 +98,9 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 
 type query struct {
 	t string
-	s *size
+	p *preset
 }
-type size struct {
+type preset struct {
 	width  uint
 	height uint
 }
@@ -120,45 +115,38 @@ func getQuery(u *url.URL) (*query, error) {
 		return nil, fmt.Errorf("only one manipulation permitted")
 	}
 
-	if _, ok := m["r"]; ok {
-		w, h, err := getSize(m["r"][0])
-		return &query{
-			t: "r",
-			s: &size{
-				width:  w,
-				height: h,
-			},
-		}, err
-	}
+	for t, preset := range m {
+		p, err := getPreset(preset[0])
+		if err != nil {
+			return nil, fmt.Errorf("failed to get the size: %s", err)
+		}
 
-	if _, ok := m["t"]; ok {
-		w, h, err := getSize(m["t"][0])
 		return &query{
-			t: "t",
-			s: &size{
-				width:  w,
-				height: h,
-			},
-		}, err
+			t: t,
+			p: p,
+		}, nil
 	}
 
 	return nil, fmt.Errorf("failed to get the manipulation %s", m)
 }
 
-func getSize(size string) (uint, uint, error) {
-	hash := strings.Split(size, "x")
+func getPreset(p string) (*preset, error) {
+	hash := strings.Split(p, "x")
 	if len(hash) != 2 {
-		return 0, 0, fmt.Errorf("failed to get the proper size")
+		return nil, fmt.Errorf("failed to get the proper size")
 	}
 
 	width, err := strconv.Atoi(hash[0])
 	if err != nil {
-		return 0, 0, fmt.Errorf("failed to get the proper width")
+		return nil, fmt.Errorf("failed to get the proper width")
 	}
 	height, err := strconv.Atoi(hash[1])
 	if err != nil {
-		return 0, 0, fmt.Errorf("failed to get the proper height")
+		return nil, fmt.Errorf("failed to get the proper height")
 	}
 
-	return uint(width), uint(height), nil
+	return &preset{
+		width:  uint(width),
+		height: uint(height),
+	}, nil
 }

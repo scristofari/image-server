@@ -38,9 +38,6 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer image.Close()
 
-	// Content-Length Mime-Version Content-type
-	// header.Header.Get("")
-
 	f, err := os.OpenFile(outputDir+"/"+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
