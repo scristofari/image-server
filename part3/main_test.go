@@ -24,7 +24,7 @@ func TestUploadImage(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		maxSize = c.maxSize
+		uploadMaxSize = c.maxSize
 
 		body, contentType, err := loadFormFile("tests/golang.png")
 		if err != nil {
@@ -53,6 +53,7 @@ func TestGetImage(t *testing.T) {
 		{"http://localhost/images/golang.png?r=23x0&t=23x34", http.StatusBadRequest},
 		{"http://localhost/images/golang.png", http.StatusBadRequest},
 		{"http://localhost/images/golang.png?r=efkgjergx2", http.StatusBadRequest},
+		{"http://localhost/images/golang.png?r=2500x4000", http.StatusOK},
 	}
 
 	for _, c := range cases {

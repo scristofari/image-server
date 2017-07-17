@@ -17,12 +17,13 @@ import (
 )
 
 const (
-	mb = 1 << 20
+	mb            = 1 << 20
+	presetMaxSize = 2000
 )
 
 var (
-	outputDir = "images"
-	maxSize   = 5 * mb
+	outputDir     = "images"
+	uploadMaxSize = 5 * mb
 )
 
 func main() {
@@ -42,7 +43,7 @@ func handlers() *mux.Router {
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	// Prevent from too large uploaded file / PART 4
-	r.Body = http.MaxBytesReader(w, r.Body, int64(maxSize))
+	r.Body = http.MaxBytesReader(w, r.Body, int64(uploadMaxSize))
 
 	image, header, err := r.FormFile("image")
 	if err != nil {
@@ -144,6 +145,13 @@ func getPreset(p string) (*preset, error) {
 	height, err := strconv.Atoi(hash[1])
 	if err != nil {
 		return nil, fmt.Errorf("failed to get the proper height")
+	}
+
+	if height > presetMaxSize {
+		return nil, fmt.Errorf("invalid preset, too high, got %d, max %d", height, presetMaxSize)
+	}
+	if width > presetMaxSize {
+		return nil, fmt.Errorf("invalid preset, too high, got %d, max %d", width, presetMaxSize)
 	}
 
 	return &preset{
