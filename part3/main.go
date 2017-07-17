@@ -22,6 +22,7 @@ const (
 
 var (
 	outputDir = "images"
+	maxSize   = 5 * mb
 )
 
 func main() {
@@ -41,7 +42,7 @@ func handlers() *mux.Router {
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	// Prevent from too large uploaded file / PART 4
-	r.Body = http.MaxBytesReader(w, r.Body, 5*mb)
+	r.Body = http.MaxBytesReader(w, r.Body, int64(maxSize))
 
 	image, header, err := r.FormFile("image")
 	if err != nil {
@@ -118,7 +119,7 @@ func getQuery(u *url.URL) (*query, error) {
 	for t, preset := range m {
 		p, err := getPreset(preset[0])
 		if err != nil {
-			return nil, fmt.Errorf("failed to get the size: %s", err)
+			return nil, fmt.Errorf("failed to get the preset: %s", err)
 		}
 
 		return &query{

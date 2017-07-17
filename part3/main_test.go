@@ -15,48 +15,59 @@ func init() {
 }
 
 func TestUploadImage(t *testing.T) {
-	body, contentType, err := loadFormFile("tests/golang.png")
-	if err != nil {
-		t.Error(err.Error())
+	cases := []struct {
+		maxSize int
+		code    int
+	}{
+		{1 << 20, http.StatusCreated},    // MB
+		{1 << 10, http.StatusBadRequest}, // KB
 	}
 
-	r, _ := http.NewRequest("POST", "/upload", body)
-	r.Header.Set("Content-Type", contentType)
-	w := httptest.NewRecorder()
+	for _, c := range cases {
+		maxSize = c.maxSize
 
-	uploadHandler(w, r)
+		body, contentType, err := loadFormFile("tests/golang.png")
+		if err != nil {
+			t.Error(err.Error())
+		}
 
-	if w.Code != http.StatusCreated {
-		t.Errorf("Expected %d, get %d", http.StatusCreated, w.Code)
-		t.Error(w.Body)
+		r, _ := http.NewRequest("POST", "/upload", body)
+		r.Header.Set("Content-Type", contentType)
+		w := httptest.NewRecorder()
+
+		uploadHandler(w, r)
+
+		if w.Code != c.code {
+			t.Errorf("Expected %d, get %d", c.code, w.Code)
+			t.Error(w.Body)
+		}
 	}
 }
 
 func TestGetImage(t *testing.T) {
-	r, err := http.NewRequest("GET", "http://localhost/images/golang.png?r=50x0", nil)
-	if err != nil {
-		t.Errorf(err.Error())
+	cases := []struct {
+		in   string
+		code int
+	}{
+		{"http://localhost/images/golang.png?r=50x0", http.StatusOK},
+		{"http://localhost/images/golang.png?r=23x0&t=23x34", http.StatusBadRequest},
+		{"http://localhost/images/golang.png", http.StatusBadRequest},
+		{"http://localhost/images/golang.png?r=efkgjergx2", http.StatusBadRequest},
 	}
-	w := httptest.NewRecorder()
 
-	imageHandler(w, r)
+	for _, c := range cases {
+		r, err := http.NewRequest("GET", c.in, nil)
+		if err != nil {
+			t.Errorf(err.Error())
+		}
+		w := httptest.NewRecorder()
 
-	if w.Code != http.StatusOK {
-		t.Errorf("Expected %d, get %d", http.StatusOK, w.Code)
-	}
-}
+		imageHandler(w, r)
 
-func TestGetImageTooManyParameters(t *testing.T) {
-	r, err := http.NewRequest("GET", "http://localhost/images/golang.png?r=23x0&t=23x34", nil)
-	if err != nil {
-		t.Errorf(err.Error())
-	}
-	w := httptest.NewRecorder()
-
-	imageHandler(w, r)
-
-	if w.Code != http.StatusBadRequest {
-		t.Errorf("Expected %d, get %d", http.StatusBadRequest, w.Code)
+		if w.Code != c.code {
+			t.Errorf("Expected %d, get %d", c.code, w.Code)
+			t.Error(w.Body)
+		}
 	}
 }
 
