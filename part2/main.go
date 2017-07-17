@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gorilla/mux"
 )
@@ -50,8 +51,11 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	image, err := ioutil.ReadFile(outputDir + "/" + vars["img"])
+	/** vars from gorilla mux empty, in test case, we do not execute the router */
+	hash := strings.Split(r.URL.Path, "/")
+	filename := outputDir + "/" + hash[2]
+
+	image, err := ioutil.ReadFile(filename)
 	if err != nil {
 		http.Error(w, "image not found : "+err.Error(), http.StatusNotFound)
 		return

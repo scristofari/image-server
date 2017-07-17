@@ -63,7 +63,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {
-	/** vars empty, in test case, we do not execute the router */
+	/** vars from gorilla mux empty, in test case, we do not execute the router */
 	hash := strings.Split(r.URL.Path, "/")
 	filename := outputDir + "/" + hash[2]
 
