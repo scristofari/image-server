@@ -10,10 +10,6 @@ import (
 	"testing"
 )
 
-func init() {
-	outputDir = "tests/out"
-}
-
 func TestUploadImage(t *testing.T) {
 	cases := []struct {
 		maxSize int
@@ -26,7 +22,7 @@ func TestUploadImage(t *testing.T) {
 	for _, c := range cases {
 		uploadMaxSize = c.maxSize
 
-		body, contentType, err := loadFormFile("tests/golang.png")
+		body, contentType, err := loadFormFile("golang.png")
 		if err != nil {
 			t.Error(err.Error())
 		}
@@ -73,7 +69,7 @@ func TestGetImage(t *testing.T) {
 }
 
 func loadFormFile(path string) (*bytes.Buffer, string, error) {
-	file, err := os.Open("tests/in/golang.png")
+	file, err := os.Open("golang.png")
 	if err != nil {
 		return nil, "", err
 	}
