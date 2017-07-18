@@ -14,6 +14,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/nfnt/resize"
+	uuid "github.com/satori/go.uuid"
 )
 
 const (
@@ -45,22 +46,24 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	// Prevent from too large uploaded file / PART 4
 	r.Body = http.MaxBytesReader(w, r.Body, int64(uploadMaxSize))
 
-	image, header, err := r.FormFile("image")
+	image, _, err := r.FormFile("image")
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to get the image: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 	defer image.Close()
 
-	f, err := os.OpenFile(outputDir+"/"+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+	uuid := uuid.NewV4().String()
+	f, err := os.OpenFile(outputDir+"/"+uuid+".png", os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	defer f.Close()
-
 	io.Copy(f, image)
-	w.WriteHeader(http.StatusCreated)
+
+	w.WriteHeader(http.StatusCreated) // Header status always before
+	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s", r.URL.Scheme, r.Host, uuid)))
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {

@@ -31,7 +31,7 @@ func TestUploadImage(t *testing.T) {
 			t.Error(err.Error())
 		}
 
-		r, _ := http.NewRequest("POST", "/upload", body)
+		r, _ := http.NewRequest("POST", "http://localhost/images/golang.png", body)
 		r.Header.Set("Content-Type", contentType)
 		w := httptest.NewRecorder()
 
@@ -53,7 +53,7 @@ func TestGetImage(t *testing.T) {
 		{"http://localhost/images/golang.png?r=23x0&t=23x34", http.StatusBadRequest},
 		{"http://localhost/images/golang.png", http.StatusBadRequest},
 		{"http://localhost/images/golang.png?r=efkgjergx2", http.StatusBadRequest},
-		{"http://localhost/images/golang.png?r=2500x4000", http.StatusOK},
+		{"http://localhost/images/golang.png?r=2500x4000", http.StatusBadRequest},
 	}
 
 	for _, c := range cases {
