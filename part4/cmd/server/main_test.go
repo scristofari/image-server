@@ -22,7 +22,7 @@ func TestUploadImage(t *testing.T) {
 	for _, c := range cases {
 		uploadMaxSize = c.maxSize
 
-		body, contentType, err := loadFormFile("../../golang.png")
+		body, contentType, err := loadFormFile("../..//files/golang.png")
 		if err != nil {
 			t.Error(err.Error())
 		}
