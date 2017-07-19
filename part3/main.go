@@ -23,7 +23,7 @@ const (
 )
 
 var (
-	outputDir     = "images"
+	outputDir     = "files"
 	uploadMaxSize = 5 * mb
 )
 

@@ -27,7 +27,7 @@ func TestUploadImage(t *testing.T) {
 			t.Error(err.Error())
 		}
 
-		r, _ := http.NewRequest("POST", "http://localhost/images/golang.png", body)
+		r, _ := http.NewRequest("POST", "http://localhost/upload", body)
 		r.Header.Set("Content-Type", contentType)
 		w := httptest.NewRecorder()
 

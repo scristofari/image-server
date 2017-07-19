@@ -28,7 +28,7 @@ func main() {
 
 func handlers() *mux.Router {
 	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/upload", uploadHandler).Methods("POST")
+	r.HandleFunc("/upload", authBasicMiddleware(uploadHandler)).Methods("POST")
 	r.HandleFunc("/images/{img}", imageHandler).Methods("GET")
 
 	return r
@@ -55,7 +55,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	/** vars from gorilla mux empty, in test case, we do not execute the router */
 	hash := strings.Split(r.URL.Path, "/")
 
-	q, err := resizer.GetQuerFromURL(r.URL)
+	q, err := resizer.GetQueryFromURL(r.URL)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to get the query: %s", err.Error()), http.StatusBadRequest)
 		return
@@ -70,4 +70,22 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Cache-Control", "max-age=3600")
 	png.Encode(w, i)
+}
+
+func authBasicMiddleware(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user, pass, ok := r.BasicAuth()
+		if !ok {
+			http.Error(w, "failed to get auth basic credentials", http.StatusForbidden)
+			return
+		}
+
+		err := resizer.CheckCredentials(user, pass)
+		if err != nil {
+			http.Error(w, "failed to sign in: "+err.Error(), http.StatusForbidden)
+			return
+		}
+
+		f(w, r)
+	}
 }

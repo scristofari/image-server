@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	outputDir = "images"
+	outputDir = "files"
 )
 
 func main() {

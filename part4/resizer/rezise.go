@@ -20,6 +20,7 @@ type Query struct {
 	Type   string
 	Preset *Preset
 }
+
 type Preset struct {
 	Width  uint
 	Height uint
@@ -50,7 +51,7 @@ func Resize(filename string, q *Query) (image.Image, error) {
 	return i, nil
 }
 
-func GetQuerFromURL(u *url.URL) (*Query, error) {
+func GetQueryFromURL(u *url.URL) (*Query, error) {
 	m, err := url.ParseQuery(u.RawQuery)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse the query: %s", err)
