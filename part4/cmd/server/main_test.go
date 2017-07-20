@@ -8,7 +8,49 @@ import (
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/scristofari/image-server/part4/resizer"
 )
+
+var (
+	server *httptest.Server
+)
+
+func init() {
+	server = httptest.NewServer(Handlers())
+}
+
+func TestUploadImageAuth(t *testing.T) {
+	cases := []struct {
+		user, password string
+		code           int
+	}{
+		{"app1", "passApp1", http.StatusCreated},
+		{"", "", http.StatusForbidden},
+		{"app1", "", http.StatusForbidden},
+		{"", "passApp1", http.StatusForbidden},
+		{"foo", "passApp1", http.StatusForbidden},
+	}
+	for _, c := range cases {
+		body, contentType, err := loadFormFile("../../files/golang.png")
+
+		r, err := http.NewRequest("POST", server.URL+"/upload", body)
+		r.Header.Set("Content-Type", contentType)
+		r.SetBasicAuth(c.user, c.password)
+		if err != nil {
+			t.Errorf(err.Error())
+		}
+
+		res, err := http.DefaultClient.Do(r)
+		if err != nil {
+			t.Error(err)
+		}
+
+		if res.StatusCode != c.code {
+			t.Errorf("Expected %d, get %d", c.code, res.StatusCode)
+		}
+	}
+}
 
 func TestUploadImage(t *testing.T) {
 	cases := []struct {
@@ -20,7 +62,7 @@ func TestUploadImage(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		uploadMaxSize = c.maxSize
+		resizer.UploadMaxSize = c.maxSize
 
 		body, contentType, err := loadFormFile("../../files/golang.png")
 		if err != nil {
@@ -31,7 +73,7 @@ func TestUploadImage(t *testing.T) {
 		r.Header.Set("Content-Type", contentType)
 		w := httptest.NewRecorder()
 
-		uploadHandler(w, r)
+		uploadHandleFunc(w, r)
 
 		if w.Code != c.code {
 			t.Errorf("Expected %d, get %d", c.code, w.Code)
@@ -59,7 +101,7 @@ func TestGetImage(t *testing.T) {
 		}
 		w := httptest.NewRecorder()
 
-		imageHandler(w, r)
+		imageHandleFunc(w, r)
 
 		if w.Code != c.code {
 			t.Errorf("Expected %d, get %d", c.code, w.Code)

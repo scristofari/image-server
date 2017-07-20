@@ -7,36 +7,33 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gorilla/csrf"
 	"github.com/gorilla/mux"
+	"github.com/gorilla/securecookie"
+
 	"github.com/scristofari/image-server/part4/resizer"
 )
 
-const (
-	mb = 1 << 20
-)
-
-var (
-	uploadMaxSize = 5 * mb
-)
+var csrfHandler = csrf.Protect([]byte(securecookie.GenerateRandomKey(32)))
 
 func main() {
-	http.Handle("/", handlers())
+	http.Handle("/", Handlers())
 
 	log.Printf("Listening on port 8080 ...")
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func handlers() *mux.Router {
+func Handlers() *mux.Router {
 	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/upload", authBasicMiddleware(uploadHandler)).Methods("POST")
-	r.HandleFunc("/images/{img}", imageHandler).Methods("GET")
+	r.HandleFunc("/upload", authBasicHandleFunc(uploadHandleFunc)).Methods("POST")
+	r.HandleFunc("/images/{img}", imageHandleFunc).Methods("GET")
 
 	return r
 }
 
-func uploadHandler(w http.ResponseWriter, r *http.Request) {
+func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 	// Prevent from too large uploaded file / PART 4
-	r.Body = http.MaxBytesReader(w, r.Body, int64(uploadMaxSize))
+	r.Body = http.MaxBytesReader(w, r.Body, int64(resizer.UploadMaxSize))
 
 	image, _, err := r.FormFile("image")
 	if err != nil {
@@ -51,7 +48,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s", r.URL.Scheme, r.Host, uuid)))
 }
 
-func imageHandler(w http.ResponseWriter, r *http.Request) {
+func imageHandleFunc(w http.ResponseWriter, r *http.Request) {
 	/** vars from gorilla mux empty, in test case, we do not execute the router */
 	hash := strings.Split(r.URL.Path, "/")
 
@@ -62,7 +59,6 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	i, err := resizer.Resize(hash[2], q)
-
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to resize the image: %s", err.Error()), http.StatusBadRequest)
 		return
@@ -72,7 +68,7 @@ func imageHandler(w http.ResponseWriter, r *http.Request) {
 	png.Encode(w, i)
 }
 
-func authBasicMiddleware(f http.HandlerFunc) http.HandlerFunc {
+func authBasicHandleFunc(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, pass, ok := r.BasicAuth()
 		if !ok {
