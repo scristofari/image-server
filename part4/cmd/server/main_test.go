@@ -32,22 +32,39 @@ func TestUploadImageAuth(t *testing.T) {
 		{"foo", "passApp1", http.StatusForbidden},
 	}
 	for _, c := range cases {
-		body, contentType, err := loadFormFile("../../files/golang.png")
-
-		r, err := http.NewRequest("POST", server.URL+"/upload", body)
-		r.Header.Set("Content-Type", contentType)
+		r, err := http.NewRequest("GET", server.URL+"/access/token", nil)
 		r.SetBasicAuth(c.user, c.password)
 		if err != nil {
-			t.Errorf(err.Error())
+			t.Error(err)
 		}
-
 		res, err := http.DefaultClient.Do(r)
 		if err != nil {
 			t.Error(err)
 		}
+		defer res.Body.Close()
+		token, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			t.Error(err)
+			return
+		}
+
+		body, contentType, err := loadFormFile("../../files/golang.png")
+		r, err = http.NewRequest("POST", server.URL+"/upload/"+string(token), body)
+		r.Header.Set("Content-Type", contentType)
+		if err != nil {
+			t.Error(err)
+		}
+
+		res, err = http.DefaultClient.Do(r)
+		if err != nil {
+			t.Error(err)
+		}
+		defer res.Body.Close()
 
 		if res.StatusCode != c.code {
 			t.Errorf("Expected %d, get %d", c.code, res.StatusCode)
+			b, _ := ioutil.ReadAll(res.Body)
+			t.Error(string(b))
 		}
 	}
 }
@@ -69,7 +86,7 @@ func TestUploadImage(t *testing.T) {
 			t.Error(err.Error())
 		}
 
-		r, _ := http.NewRequest("POST", "http://localhost/upload", body)
+		r, _ := http.NewRequest("POST", "http://localhost/upload/csrf", body)
 		r.Header.Set("Content-Type", contentType)
 		w := httptest.NewRecorder()
 

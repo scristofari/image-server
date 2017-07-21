@@ -6,29 +6,38 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
-	"github.com/gorilla/csrf"
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/securecookie"
 
 	"github.com/scristofari/image-server/part4/resizer"
 )
 
-var csrfHandler = csrf.Protect([]byte(securecookie.GenerateRandomKey(32)))
-
 func main() {
-	http.Handle("/", Handlers())
-
+	r := Handlers()
 	log.Printf("Listening on port 8080 ...")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-func Handlers() *mux.Router {
+func Handlers() http.Handler {
 	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/upload", authBasicHandleFunc(uploadHandleFunc)).Methods("POST")
+	r.HandleFunc("/access/token", authBasicHandleFunc(accessHandleFunc)).Methods("GET")
+	r.HandleFunc("/upload/{jwt}", jwtHandleFunc(uploadHandleFunc)).Methods("POST")
 	r.HandleFunc("/images/{img}", imageHandleFunc).Methods("GET")
-
 	return r
+}
+
+func accessHandleFunc(w http.ResponseWriter, r *http.Request) {
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
+	})
+	t, err := token.SignedString("secret")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to generate the token: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+	w.Write([]byte(fmt.Sprintf("%s://%s/upload/%s", r.URL.Scheme, r.Host, t)))
 }
 
 func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
@@ -79,6 +88,33 @@ func authBasicHandleFunc(f http.HandlerFunc) http.HandlerFunc {
 		err := resizer.CheckCredentials(user, pass)
 		if err != nil {
 			http.Error(w, "failed to sign in: "+err.Error(), http.StatusForbidden)
+			return
+		}
+
+		f(w, r)
+	}
+}
+
+func jwtHandleFunc(f http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		/** vars from gorilla mux empty, in test case, we do not execute the router */
+		hash := strings.Split(r.URL.Path, "/")
+		fmt.Println(hash[2])
+
+		token, err := jwt.Parse(hash[2], func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			}
+
+			return "secret", nil
+		})
+		if err != nil {
+			http.Error(w, "failed to authenticate: "+err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		if !token.Valid {
+			http.Error(w, "failed to authenticate, token not valid", http.StatusUnauthorized)
 			return
 		}
 
