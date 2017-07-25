@@ -32,12 +32,12 @@ func accessHandleFunc(w http.ResponseWriter, r *http.Request) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
 	})
-	t, err := token.SignedString("secret")
+	t, err := token.SignedString([]byte("secret"))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to generate the token: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf("%s://%s/upload/%s", r.URL.Scheme, r.Host, t)))
+	w.Write([]byte(fmt.Sprintf("%s://%s/upload/%s", "http", r.Host, t)))
 }
 
 func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
@@ -54,7 +54,7 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 	uuid, err := resizer.Uploadfile(image)
 
 	w.WriteHeader(http.StatusCreated) // Header status always before
-	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s", r.URL.Scheme, r.Host, uuid)))
+	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s.png", "http", r.Host, uuid)))
 }
 
 func imageHandleFunc(w http.ResponseWriter, r *http.Request) {
@@ -99,14 +99,13 @@ func jwtHandleFunc(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		/** vars from gorilla mux empty, in test case, we do not execute the router */
 		hash := strings.Split(r.URL.Path, "/")
-		fmt.Println(hash[2])
 
 		token, err := jwt.Parse(hash[2], func(token *jwt.Token) (interface{}, error) {
 			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
 
-			return "secret", nil
+			return []byte("secret"), nil
 		})
 		if err != nil {
 			http.Error(w, "failed to authenticate: "+err.Error(), http.StatusUnauthorized)
