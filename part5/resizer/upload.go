@@ -13,14 +13,13 @@ const (
 
 var (
 	UploadMaxSize = 5 * mb
-	outputDir     = "../../files"
 )
 
 // Uploadfile : ___
 func Uploadfile(p Provider, image multipart.File) (string, error) {
 	uuid := uuid.NewV4().String()
 
-	err := p.Put(outputDir+"/"+uuid+".png", image)
+	err := p.Put(uuid+".png", image)
 
 	if err != nil {
 		return "", fmt.Errorf("failed to copy: %v", err)

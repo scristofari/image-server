@@ -26,8 +26,6 @@ type Preset struct {
 }
 
 func Resize(p Provider, filename string, q *Query) (image.Image, error) {
-	filename = outputDir + "/" + filename
-
 	r, err := p.Get(filename)
 	defer r.Close()
 

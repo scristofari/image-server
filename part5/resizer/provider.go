@@ -23,7 +23,7 @@ type DiskProvider struct {
 }
 
 func (d *DiskProvider) Get(filename string) (io.ReadCloser, error) {
-	file, err := os.Open(filename)
+	file, err := os.Open("../../files/" + filename)
 	if err != nil {
 		return nil, err
 	}
@@ -31,7 +31,7 @@ func (d *DiskProvider) Get(filename string) (io.ReadCloser, error) {
 }
 
 func (d *DiskProvider) Put(filename string, image multipart.File) error {
-	f, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0666)
+	f, err := os.OpenFile("../../files/"+filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return fmt.Errorf("failed to open file: %v", err)
 	}
@@ -51,7 +51,7 @@ func (a *awsProvider) Get(filename string) (io.ReadCloser, error) {
 
 	ctx := context.Background()
 	result, err := svc.GetObjectWithContext(ctx, &s3.GetObjectInput{
-		Bucket: aws.String("my-bucket"),
+		Bucket: aws.String("image-server-filer"),
 		Key:    aws.String(filename),
 	})
 
@@ -64,4 +64,21 @@ func (a *awsProvider) Get(filename string) (io.ReadCloser, error) {
 	}
 
 	return result.Body, nil
+}
+
+func (a *awsProvider) Put(filename string, image multipart.File) error {
+	sess := session.Must(session.NewSession())
+	svc := s3.New(sess)
+
+	ctx := context.Background()
+	_, err := svc.PutObjectWithContext(ctx, &s3.PutObjectInput{
+		Bucket: aws.String("image-server-filer"),
+		Key:    aws.String(filename),
+		Body:   image,
+	})
+	if err != nil {
+		return fmt.Errorf("failed to upload object, %v\n", err)
+	}
+
+	return nil
 }
