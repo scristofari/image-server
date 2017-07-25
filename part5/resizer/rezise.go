@@ -28,9 +28,10 @@ type Preset struct {
 func Resize(p Provider, filename string, q *Query) (image.Image, error) {
 	filename = outputDir + "/" + filename
 
-	file, err := p.Get(filename)
+	r, err := p.Get(filename)
+	defer r.Close()
 
-	img, err := png.Decode(file)
+	img, err := png.Decode(r)
 	if err != nil {
 		return nil, err
 	}

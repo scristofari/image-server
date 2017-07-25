@@ -9,18 +9,13 @@ import (
 	"os"
 	"testing"
 
-	"github.com/scristofari/image-server/part4/resizer"
+	"github.com/scristofari/image-server/part5/resizer"
 )
-
-var (
-	server *httptest.Server
-)
-
-func init() {
-	server = httptest.NewServer(Handlers())
-}
 
 func TestAccessToken(t *testing.T) {
+	server := httptest.NewServer(handlers())
+	defer server.Close()
+
 	cases := []struct {
 		user, password string
 		code           int
@@ -51,6 +46,9 @@ func TestAccessToken(t *testing.T) {
 }
 
 func TestUploadImageAuth(t *testing.T) {
+	server := httptest.NewServer(handlers())
+	defer server.Close()
+
 	cases := []struct {
 		user, password string
 		accessToken    bool
@@ -118,7 +116,7 @@ func TestUploadImage(t *testing.T) {
 			t.Error(err.Error())
 		}
 
-		r, _ := http.NewRequest("POST", "http://localhost/upload/csrf", body)
+		r, _ := http.NewRequest("POST", "http://localhost/upload/token", body)
 		r.Header.Set("Content-Type", contentType)
 		w := httptest.NewRecorder()
 

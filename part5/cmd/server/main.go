@@ -11,16 +11,17 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
 
-	"github.com/scristofari/image-server/part4/resizer"
+	"github.com/scristofari/image-server/part5/resizer"
 )
 
 func main() {
-	r := Handlers()
+	r := handlers()
+
 	log.Printf("Listening on port 8080 ...")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-func Handlers() http.Handler {
+func handlers() http.Handler {
 	r := mux.NewRouter().StrictSlash(true)
 	r.HandleFunc("/access/token", authBasicHandleFunc(accessHandleFunc)).Methods("GET")
 	r.HandleFunc("/upload/{jwt}", jwtHandleFunc(uploadHandleFunc)).Methods("POST")
@@ -51,7 +52,11 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 	}
 	defer image.Close()
 
-	uuid, err := resizer.Uploadfile(image)
+	uuid, err := resizer.Uploadfile(&resizer.DiskProvider{}, image)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("failed to upload the image: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
 
 	w.WriteHeader(http.StatusCreated) // Header status always before
 	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s.png", "http", r.Host, uuid)))
@@ -67,7 +72,7 @@ func imageHandleFunc(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	i, err := resizer.Resize(hash[2], q)
+	i, err := resizer.Resize(&resizer.DiskProvider{}, hash[2], q)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to resize the image: %s", err.Error()), http.StatusBadRequest)
 		return
