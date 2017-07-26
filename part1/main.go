@@ -1,7 +1,12 @@
 package main
 
-import "fmt"
+import "net/http"
+
+func uploadHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Upload route"))
+}
 
 func main() {
-	fmt.Println("Hello, image-server")
+	http.HandleFunc("/upload", uploadHandler)
+	http.ListenAndServe(":8080", nil)
 }

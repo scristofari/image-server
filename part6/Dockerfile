@@ -10,5 +10,5 @@ WORKDIR /go/src/github.com/scristofari/image-server/cmd/server
 RUN go get -u github.com/golang/dep/cmd/dep
 
 # install and run
-RUN go install
-CMD server
+# RUN go install
+# CMD server
