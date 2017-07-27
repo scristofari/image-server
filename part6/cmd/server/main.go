@@ -51,21 +51,47 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 	// Prevent from too large uploaded file / PART 4
 	r.Body = http.MaxBytesReader(w, r.Body, int64(resizer.UploadMaxSize))
 
-	image, _, err := r.FormFile("image")
-	if err != nil {
-		http.Error(w, fmt.Sprintf("failed to get the image: %s", err.Error()), http.StatusBadRequest)
-		return
-	}
-	defer image.Close()
+	ctx := r.Context()
+	timeout := time.After(1 * time.Minute)
+	resultChan := make(chan string, 1)
+	errorChan := make(chan error, 1)
 
-	uuid, err := resizer.Uploadfile(&resizer.DiskProvider{}, image)
-	if err != nil {
-		http.Error(w, fmt.Sprintf("failed to upload the image: %s", err.Error()), http.StatusBadRequest)
-		return
-	}
+	go func() {
+		image, _, err := r.FormFile("image")
+		if err != nil {
+			errorChan <- err
+			return
+		}
+		defer image.Close()
 
-	w.WriteHeader(http.StatusCreated) // Header status always before
-	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s.png", "http", r.Host, uuid)))
+		uuid, err := resizer.Uploadfile(&resizer.DiskProvider{}, image)
+		if err != nil {
+			errorChan <- err
+			return
+		}
+
+		resultChan <- uuid
+	}()
+
+	defer close(resultChan)
+	defer close(errorChan)
+	for {
+		select {
+		case <-ctx.Done():
+			http.Error(w, "Cancel", http.StatusBadRequest)
+			return
+		case <-timeout:
+			http.Error(w, "Timeout", http.StatusBadRequest)
+			return
+		case uuid := <-resultChan:
+			w.WriteHeader(http.StatusCreated)
+			w.Write([]byte(fmt.Sprintf("%s://%s/images/%s.png", "http", r.Host, uuid)))
+			return
+		case err := <-errorChan:
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+	}
 }
 
 func imageHandleFunc(w http.ResponseWriter, r *http.Request) {

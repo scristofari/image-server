@@ -40,11 +40,12 @@ There're different ways to achieve that:
  In this part, we use the build-in router in go.
 
  ```go
- http.HandleFunc("/upload", uploadHandler)
+r := http.NewServeMux()
+r.HandleFunc("/upload", uploadHandler)
  ```
 
  For a given path, the router will call a function which have as interface.
 
  ```go
-    func handleFunc(w http.ResponseWriter, r *http.Request)
+func handleFunc(w http.ResponseWriter, r *http.Request)
  ```
