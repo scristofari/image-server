@@ -1,5 +1,9 @@
 # Part 1 : Initialisation of the project
 
+## What's needed to be done.
+
+ - create a webserver which have a route which print `upload route`
+
 ## Image
 
 We will use the official docker image for golang.
@@ -12,15 +16,11 @@ The command "make dev", will build and run the project.
 
 ## Source code
 
-All the source code must be in the "GOPATH" and in a folder "src".
+In go, all the source code must be in the "GOPATH" and in a folder "src".
 Elsewhere, it will be impossible to build the project.
 Here, in the golang image, "GOPATH=/go".
 
-## What's needed to be done.
-
- - created a webserver which print `upload route`
-
- ## Buuild the project.
+ ## Build the project.
 
 There're different ways to achieve that:
 
@@ -32,3 +32,19 @@ There're different ways to achieve that:
 
  - go run main.go
  Will build and run the project.
+
+ For more info, go [there](https://github.com/campoy/go-tooling-workshop/tree/master/2-building-artifacts)
+
+ ## Code
+
+ In this part, we use the build-in router in go.
+
+ ```go
+ http.HandleFunc("/upload", uploadHandler)
+ ```
+
+ For a given path, the router will call a function which have as interface.
+
+ ```go
+    func handleFunc(w http.ResponseWriter, r *http.Request)
+ ```
