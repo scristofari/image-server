@@ -3,7 +3,7 @@ build:
 
 dev: build
 	docker run -it \
-	-v $(PWD):/go/src/github.com/scristofari/image-server \
+	-v $(PWD):/go/src/github.com/scristofari/image-server/part4 \
 	-p 8080:8080 \
 	4-image-server:latest bash
 
