@@ -1,13 +1,9 @@
-## Part 1 : Create a docker environment for dev
+# Part 1 : Initialisation of the project
 
 ## Image
 
 We will use the official docker image for golang.
 There are all the libraries needed to build the project.
-
-In the future, we will just have a binarie, so the alpine
-alone will be necessary.
-See Part 6, for multi-staging docker.
 
 ## Makefile
 
@@ -19,3 +15,20 @@ The command "make dev", will build and run the project.
 All the source code must be in the "GOPATH" and in a folder "src".
 Elsewhere, it will be impossible to build the project.
 Here, in the golang image, "GOPATH=/go".
+
+## What's needed to be done.
+
+ - created a webserver which print `upload route`
+
+ ## Buuild the project.
+
+There're different ways to achieve that:
+
+ - go build .
+ Will build a binarie for the project.
+
+ - go install
+ Will build a binarie and place it in a `bin` folder
+
+ - go run main.go
+ Will build and run the project.

@@ -15,12 +15,7 @@ This will be necessary to get the dependencies for this part.
 In this case, the router "gorilla/mux".
 
 ## What's needed to be done.
-    - a web server
+
     - a upload url
     - a get image url
     - each image must be in a images folder
-    - each image must be less than 5Mo
-    - eaxh image must be of the minetype jpg
-
-## Command
-    - dep init
