@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"image/png"
 	"log"
@@ -60,17 +61,14 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 	// Prevent from too large uploaded file / PART 4
 	r.Body = http.MaxBytesReader(w, r.Body, int64(resizer.UploadMaxSize))
 
-	ctx := r.Context()
-	timeout := time.After(30 * time.Second)
 	rc := make(chan imageResizerChan, 1)
-	c := make(chan bool, 1)
-
 	go func(rc chan imageResizerChan, c chan bool, r *http.Request) {
 		select {
-		case _ = <-c:
+		case <-c:
 			close(rc)
 			return
 		default:
+			time.Sleep(2 * time.Second)
 			image, _, err := r.FormFile("image")
 			if err != nil {
 				rc <- imageResizerChan{err: err}
@@ -88,18 +86,14 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 		}
 	}(rc, c, r)
 
-	defer func(c chan bool) {
-		c <- true
-		close(c)
-	}(c)
-
+	ctxTimeout, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+	defer cancel()
 	for {
 		select {
-		case <-ctx.Done():
-			http.Error(w, "Cancel", http.StatusBadRequest)
-			return
-		case <-timeout:
-			http.Error(w, "Timeout", http.StatusBadRequest)
+		case <-ctxTimeout.Done():
+			c <- true
+			close(c)
+			http.Error(w, ctxTimeout.Err().Error(), http.StatusBadRequest)
 			return
 		case c := <-rc:
 			if c.err != nil {
