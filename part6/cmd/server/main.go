@@ -51,34 +51,48 @@ func accessHandleFunc(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(fmt.Sprintf("%s://%s/upload/%s", scheme, r.Host, t)))
 }
 
+type imageResizerChan struct {
+	filename string
+	err      error
+}
+
 func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 	// Prevent from too large uploaded file / PART 4
 	r.Body = http.MaxBytesReader(w, r.Body, int64(resizer.UploadMaxSize))
 
 	ctx := r.Context()
-	timeout := time.After(1 * time.Minute)
-	resultChan := make(chan string, 1)
-	errorChan := make(chan error, 1)
+	timeout := time.After(30 * time.Second)
+	rc := make(chan imageResizerChan, 1)
+	c := make(chan bool, 1)
 
-	go func() {
-		image, _, err := r.FormFile("image")
-		if err != nil {
-			errorChan <- err
+	go func(rc chan imageResizerChan, c chan bool, r *http.Request) {
+		select {
+		case _ = <-c:
+			close(rc)
 			return
+		default:
+			image, _, err := r.FormFile("image")
+			if err != nil {
+				rc <- imageResizerChan{err: err}
+				return
+			}
+			defer image.Close()
+
+			filename, err := resizer.Uploadfile(&resizer.DiskProvider{}, image)
+			if err != nil {
+				rc <- imageResizerChan{err: err}
+				return
+			}
+
+			rc <- imageResizerChan{filename: filename}
 		}
-		defer image.Close()
+	}(rc, c, r)
 
-		uuid, err := resizer.Uploadfile(&resizer.DiskProvider{}, image)
-		if err != nil {
-			errorChan <- err
-			return
-		}
+	defer func(c chan bool) {
+		c <- true
+		close(c)
+	}(c)
 
-		resultChan <- uuid
-	}()
-
-	defer close(resultChan)
-	defer close(errorChan)
 	for {
 		select {
 		case <-ctx.Done():
@@ -87,16 +101,17 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 		case <-timeout:
 			http.Error(w, "Timeout", http.StatusBadRequest)
 			return
-		case uuid := <-resultChan:
+		case c := <-rc:
+			if c.err != nil {
+				http.Error(w, c.err.Error(), http.StatusBadRequest)
+				return
+			}
 			scheme := "http"
 			if r.TLS != nil {
 				scheme = "https"
 			}
 			w.WriteHeader(http.StatusCreated)
-			w.Write([]byte(fmt.Sprintf("%s://%s/images/%s.png", scheme, r.Host, uuid)))
-			return
-		case err := <-errorChan:
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			w.Write([]byte(fmt.Sprintf("%s://%s/images/%s", scheme, r.Host, c.filename)))
 			return
 		}
 	}
