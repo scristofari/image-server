@@ -1,16 +1,16 @@
 package resizer
 
 import (
-	"context"
+	"bytes"
 	"fmt"
 	"io"
 	"mime/multipart"
 	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 )
 
 type Provider interface {
@@ -48,34 +48,29 @@ type AWSProvider struct {
 func (a *AWSProvider) Get(filename string) (io.ReadCloser, error) {
 	sess := session.Must(session.NewSession())
 	svc := s3.New(sess)
+	downloader := s3manager.NewDownloaderWithClient(svc)
 
-	ctx := context.Background()
-	result, err := svc.GetObjectWithContext(ctx, &s3.GetObjectInput{
-		Bucket: aws.String("image-server-filer"),
+	buffer := &aws.WriteAtBuffer{}
+	downloader.Download(buffer, &s3.GetObjectInput{
+		Bucket: aws.String(os.Getenv("AWS_BUCKET")),
 		Key:    aws.String(filename),
 	})
 
-	if err != nil {
-		aerr, ok := err.(awserr.Error)
-		if ok && aerr.Code() == s3.ErrCodeNoSuchKey {
-			return nil, fmt.Errorf("failed to get the requested file, %s", err)
-		}
-		return nil, fmt.Errorf("failed to get the requested file, %s", err)
-	}
-
-	return result.Body, nil
+	return aws.ReadSeekCloser(bytes.NewReader(buffer.Bytes())), nil
 }
 
 func (a *AWSProvider) Put(filename string, image multipart.File) error {
 	sess := session.Must(session.NewSession())
 	svc := s3.New(sess)
+	uploader := s3manager.NewUploaderWithClient(svc)
 
-	ctx := context.Background()
-	_, err := svc.PutObjectWithContext(ctx, &s3.PutObjectInput{
-		Bucket: aws.String("image-server-filer"),
+	upParams := &s3manager.UploadInput{
+		Bucket: aws.String(os.Getenv("AWS_BUCKET")),
 		Key:    aws.String(filename),
 		Body:   image,
-	})
+	}
+
+	_, err := uploader.Upload(upParams)
 	if err != nil {
 		return fmt.Errorf("failed to upload object, %v\n", err)
 	}
