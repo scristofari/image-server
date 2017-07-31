@@ -31,10 +31,12 @@ func TestAccessToken(t *testing.T) {
 		r.SetBasicAuth(c.user, c.password)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		res, err := http.DefaultClient.Do(r)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 
 		if res.StatusCode != c.code {
@@ -62,10 +64,12 @@ func TestUploadImageAuth(t *testing.T) {
 		r.SetBasicAuth(c.user, c.password)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		res, err := http.DefaultClient.Do(r)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		defer res.Body.Close()
 		urlLink, err := ioutil.ReadAll(res.Body)
@@ -80,14 +84,20 @@ func TestUploadImageAuth(t *testing.T) {
 		} else {
 			r, err = http.NewRequest("POST", server.URL+"/upload/token", body)
 		}
+		if err != nil {
+			t.Error(err)
+			return
+		}
 		r.Header.Set("Content-Type", contentType)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 
 		res, err = http.DefaultClient.Do(r)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		defer res.Body.Close()
 

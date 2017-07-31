@@ -38,7 +38,11 @@ func accessHandleFunc(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("failed to generate the token: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf("%s://%s/upload/%s", "http", r.Host, t)))
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	w.Write([]byte(fmt.Sprintf("%s://%s/upload/%s", scheme, r.Host, t)))
 }
 
 func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
@@ -52,14 +56,18 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 	}
 	defer image.Close()
 
-	uuid, err := resizer.Uploadfile(&resizer.DiskProvider{}, image)
+	filename, err := resizer.Uploadfile(&resizer.DiskProvider{}, image)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to upload the image: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
 	w.WriteHeader(http.StatusCreated) // Header status always before
-	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s.png", "http", r.Host, uuid)))
+	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s", scheme, r.Host, filename)))
 }
 
 func imageHandleFunc(w http.ResponseWriter, r *http.Request) {

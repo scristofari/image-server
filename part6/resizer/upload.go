@@ -17,13 +17,13 @@ var (
 
 // Uploadfile : ___
 func Uploadfile(p Provider, image multipart.File) (string, error) {
-	uuid := uuid.NewV4().String()
+	filename := uuid.NewV4().String() + ".png"
 
-	err := p.Put(uuid+".png", image)
+	err := p.Put(filename, image)
 
 	if err != nil {
 		return "", fmt.Errorf("failed to copy: %v", err)
 	}
 
-	return uuid, nil
+	return filename, nil
 }

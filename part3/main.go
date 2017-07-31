@@ -53,8 +53,8 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer image.Close()
 
-	uuid := uuid.NewV4().String()
-	f, err := os.OpenFile(outputDir+"/"+uuid+".png", os.O_WRONLY|os.O_CREATE, 0666)
+	filename := uuid.NewV4().String() + ".png"
+	f, err := os.OpenFile(outputDir+"/"+filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -63,7 +63,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	io.Copy(f, image)
 
 	w.WriteHeader(http.StatusCreated) // Header status always before
-	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s", r.URL.Scheme, r.Host, uuid)))
+	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s.png", r.URL.Scheme, r.Host, filename)))
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {

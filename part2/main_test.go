@@ -14,6 +14,7 @@ func TestUploadImage(t *testing.T) {
 	body, contentType, err := loadFormFile("golang.png")
 	if err != nil {
 		t.Error(err.Error())
+		return
 	}
 
 	r, _ := http.NewRequest("POST", "http://localhost/images/golang.png", body)
@@ -32,6 +33,7 @@ func TestGetImage(t *testing.T) {
 	r, err := http.NewRequest("GET", "http://localhost/images/golang.png", nil)
 	if err != nil {
 		t.Errorf(err.Error())
+		return
 	}
 	w := httptest.NewRecorder()
 

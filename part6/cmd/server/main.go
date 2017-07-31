@@ -39,12 +39,16 @@ func accessHandleFunc(w http.ResponseWriter, r *http.Request) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
 		ExpiresAt: time.Now().Add(time.Minute * 1).Unix(),
 	})
-	t, err := token.SignedString([]byte("secret"))
+	t, err := token.SignedString([]byte(os.Getenv("JWT_SECRET")))
 	if err != nil {
 		http.Error(w, fmt.Sprintf("failed to generate the token: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf("%s://%s/upload/%s", "http", r.Host, t)))
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	w.Write([]byte(fmt.Sprintf("%s://%s/upload/%s", scheme, r.Host, t)))
 }
 
 func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
@@ -84,8 +88,12 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Timeout", http.StatusBadRequest)
 			return
 		case uuid := <-resultChan:
+			scheme := "http"
+			if r.TLS != nil {
+				scheme = "https"
+			}
 			w.WriteHeader(http.StatusCreated)
-			w.Write([]byte(fmt.Sprintf("%s://%s/images/%s.png", "http", r.Host, uuid)))
+			w.Write([]byte(fmt.Sprintf("%s://%s/images/%s.png", scheme, r.Host, uuid)))
 			return
 		case err := <-errorChan:
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -142,7 +150,7 @@ func jwtHandleFunc(f http.HandlerFunc) http.HandlerFunc {
 				return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 			}
 
-			return []byte("secret"), nil
+			return []byte(os.Getenv("JWT_SECRET")), nil
 		})
 		if err != nil {
 			http.Error(w, "failed to authenticate: "+err.Error(), http.StatusUnauthorized)

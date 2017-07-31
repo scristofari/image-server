@@ -15,12 +15,12 @@ import (
 )
 
 func main() {
-	r := Handlers()
+	r := handlers()
 	log.Printf("Listening on port 8080 ...")
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
-func Handlers() http.Handler {
+func handlers() http.Handler {
 	r := mux.NewRouter().StrictSlash(true)
 	r.HandleFunc("/access/token", authBasicHandleFunc(accessHandleFunc)).Methods("GET")
 	r.HandleFunc("/upload/{jwt}", jwtHandleFunc(uploadHandleFunc)).Methods("POST")
@@ -37,7 +37,12 @@ func accessHandleFunc(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("failed to generate the token: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
-	w.Write([]byte(fmt.Sprintf("%s://%s/upload/%s", "http", r.Host, t)))
+
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
+	w.Write([]byte(fmt.Sprintf("%s://%s/upload/%s", scheme, r.Host, t)))
 }
 
 func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
@@ -51,10 +56,14 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 	}
 	defer image.Close()
 
-	uuid, err := resizer.Uploadfile(image)
+	filename, err := resizer.Uploadfile(image)
 
+	scheme := "http"
+	if r.TLS != nil {
+		scheme = "https"
+	}
 	w.WriteHeader(http.StatusCreated) // Header status always before
-	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s.png", "http", r.Host, uuid)))
+	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s", scheme, r.Host, filename)))
 }
 
 func imageHandleFunc(w http.ResponseWriter, r *http.Request) {

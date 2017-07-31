@@ -48,6 +48,7 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 
 	io.Copy(f, image)
 	w.WriteHeader(http.StatusCreated)
+	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s", r.URL.Scheme, r.Host, header.Filename)))
 }
 
 func imageHandler(w http.ResponseWriter, r *http.Request) {

@@ -45,13 +45,21 @@ type AWSProvider struct {
 	Provider
 }
 
+func NewAWSProvider() *AWSProvider {
+	bucket := os.Getenv("AWS_BUCKET")
+	if bucket == "" {
+		panic("AWS_BUCKET not configured !")
+	}
+	return &AWSProvider{}
+}
+
 func (a *AWSProvider) Get(filename string) (io.ReadCloser, error) {
 	sess := session.Must(session.NewSession())
 	svc := s3.New(sess)
 
 	ctx := context.Background()
 	result, err := svc.GetObjectWithContext(ctx, &s3.GetObjectInput{
-		Bucket: aws.String("image-server-filer"),
+		Bucket: aws.String(os.Getenv("AWS_BUCKET")),
 		Key:    aws.String(filename),
 	})
 
@@ -72,7 +80,7 @@ func (a *AWSProvider) Put(filename string, image multipart.File) error {
 
 	ctx := context.Background()
 	_, err := svc.PutObjectWithContext(ctx, &s3.PutObjectInput{
-		Bucket: aws.String("image-server-filer"),
+		Bucket: aws.String(os.Getenv("AWS_BUCKET")),
 		Key:    aws.String(filename),
 		Body:   image,
 	})

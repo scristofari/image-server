@@ -31,10 +31,12 @@ func TestAccessToken(t *testing.T) {
 		r.SetBasicAuth(c.user, c.password)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		res, err := http.DefaultClient.Do(r)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 
 		if res.StatusCode != c.code {
@@ -62,10 +64,12 @@ func TestUploadImageAuth(t *testing.T) {
 		r.SetBasicAuth(c.user, c.password)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		res, err := http.DefaultClient.Do(r)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		defer res.Body.Close()
 		urlLink, err := ioutil.ReadAll(res.Body)
@@ -83,11 +87,13 @@ func TestUploadImageAuth(t *testing.T) {
 		r.Header.Set("Content-Type", contentType)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 
 		res, err = http.DefaultClient.Do(r)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		defer res.Body.Close()
 
@@ -114,6 +120,7 @@ func TestUploadImage(t *testing.T) {
 		body, contentType, err := loadFormFile("../../files/golang.png")
 		if err != nil {
 			t.Error(err.Error())
+			return
 		}
 
 		r, _ := http.NewRequest("POST", "http://localhost/upload/token", body)
@@ -145,6 +152,7 @@ func TestGetImage(t *testing.T) {
 		r, err := http.NewRequest("GET", c.in, nil)
 		if err != nil {
 			t.Errorf(err.Error())
+			return
 		}
 		w := httptest.NewRecorder()
 

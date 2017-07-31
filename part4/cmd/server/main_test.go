@@ -16,11 +16,10 @@ var (
 	server *httptest.Server
 )
 
-func init() {
-	server = httptest.NewServer(Handlers())
-}
-
 func TestAccessToken(t *testing.T) {
+	server = httptest.NewServer(handlers())
+	defer server.Close()
+
 	cases := []struct {
 		user, password string
 		code           int
@@ -36,10 +35,12 @@ func TestAccessToken(t *testing.T) {
 		r.SetBasicAuth(c.user, c.password)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		res, err := http.DefaultClient.Do(r)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 
 		if res.StatusCode != c.code {
@@ -51,6 +52,9 @@ func TestAccessToken(t *testing.T) {
 }
 
 func TestUploadImageAuth(t *testing.T) {
+	server = httptest.NewServer(handlers())
+	defer server.Close()
+
 	cases := []struct {
 		user, password string
 		accessToken    bool
@@ -64,10 +68,12 @@ func TestUploadImageAuth(t *testing.T) {
 		r.SetBasicAuth(c.user, c.password)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		res, err := http.DefaultClient.Do(r)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		defer res.Body.Close()
 		urlLink, err := ioutil.ReadAll(res.Body)
@@ -85,11 +91,13 @@ func TestUploadImageAuth(t *testing.T) {
 		r.Header.Set("Content-Type", contentType)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 
 		res, err = http.DefaultClient.Do(r)
 		if err != nil {
 			t.Error(err)
+			return
 		}
 		defer res.Body.Close()
 

@@ -20,8 +20,8 @@ var (
 
 // Uploadfile : ___
 func Uploadfile(image multipart.File) (string, error) {
-	uuid := uuid.NewV4().String()
-	f, err := os.OpenFile(outputDir+"/"+uuid+".png", os.O_WRONLY|os.O_CREATE, 0666)
+	filename := uuid.NewV4().String() + ".png"
+	f, err := os.OpenFile(outputDir+"/"+filename, os.O_WRONLY|os.O_CREATE, 0666)
 	if err != nil {
 		return "", fmt.Errorf("failed to open file: %v", err)
 	}
@@ -32,5 +32,5 @@ func Uploadfile(image multipart.File) (string, error) {
 		return "", fmt.Errorf("failed to copy: %v", err)
 	}
 
-	return uuid, nil
+	return filename, nil
 }
