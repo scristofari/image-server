@@ -46,7 +46,12 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer f.Close()
 
-	io.Copy(f, image)
+	_, err = io.Copy(f, image)
+	if err != nil {
+		http.Error(w, "failed to copy the image to the file: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
 	w.Write([]byte(fmt.Sprintf("%s://%s/images/%s", r.URL.Scheme, r.Host, header.Filename)))
 }

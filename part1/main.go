@@ -1,6 +1,9 @@
 package main
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+)
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Upload route"))
@@ -9,5 +12,5 @@ func uploadHandler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	r := http.NewServeMux()
 	r.HandleFunc("/upload", uploadHandler)
-	http.ListenAndServe(":8080", r)
+	log.Fatal(http.ListenAndServe(":8080", r))
 }

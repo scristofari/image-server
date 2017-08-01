@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestUpoad(t *testing.T) {
+func TestUpload(t *testing.T) {
 	r, _ := http.NewRequest("POST", "http://localhost/upload", nil)
 
 	w := httptest.NewRecorder()

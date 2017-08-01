@@ -43,7 +43,6 @@ func handlers() *mux.Router {
 }
 
 func uploadHandler(w http.ResponseWriter, r *http.Request) {
-	// Prevent from too large uploaded file / PART 4
 	r.Body = http.MaxBytesReader(w, r.Body, int64(uploadMaxSize))
 
 	image, _, err := r.FormFile("image")

@@ -62,6 +62,7 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 	r.Body = http.MaxBytesReader(w, r.Body, int64(resizer.UploadMaxSize))
 
 	rc := make(chan imageResizerChan, 1)
+	c := make(chan bool, 1)
 	go func(rc chan imageResizerChan, c chan bool, r *http.Request) {
 		select {
 		case <-c:
@@ -86,7 +87,7 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 		}
 	}(rc, c, r)
 
-	ctxTimeout, cancel := context.WithTimeout(r.Context(), 30*time.Second)
+	ctxTimeout, cancel := context.WithTimeout(r.Context(), 1*time.Second)
 	defer cancel()
 	for {
 		select {
