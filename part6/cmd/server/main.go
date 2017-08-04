@@ -30,8 +30,8 @@ func main() {
 
 func handlers() http.Handler {
 	r := mux.NewRouter().StrictSlash(true)
-	r.HandleFunc("/access/token", authBasicHandleFunc(accessHandleFunc)).Methods("GET")
-	r.HandleFunc("/upload/{jwt}", jwtHandleFunc(uploadHandleFunc)).Methods("POST")
+	r.HandleFunc("/access/token", authBasicHandlerFunc(accessHandleFunc)).Methods("GET")
+	r.HandleFunc("/upload/{jwt}", jwtHandlerFunc(uploadHandleFunc)).Methods("POST")
 	r.HandleFunc("/images/{img}", imageHandleFunc).Methods("GET")
 	return r
 }
@@ -132,7 +132,7 @@ func imageHandleFunc(w http.ResponseWriter, r *http.Request) {
 	png.Encode(w, i)
 }
 
-func authBasicHandleFunc(f http.HandlerFunc) http.HandlerFunc {
+func authBasicHandlerFunc(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, pass, ok := r.BasicAuth()
 		if !ok {
@@ -150,7 +150,7 @@ func authBasicHandleFunc(f http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-func jwtHandleFunc(f http.HandlerFunc) http.HandlerFunc {
+func jwtHandlerFunc(f http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		/** vars from gorilla mux empty, in test case, we do not execute the router */
 		hash := strings.Split(r.URL.Path, "/")

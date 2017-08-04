@@ -127,7 +127,7 @@ The same mecanic as the basic auth middleware.
 
 ## Tests 
 
-We now change the tests to reflex the real calls, we need the router witth all the middlewares.  
+We now change the tests to reflex the real calls, we need the router with all the middlewares.  
 For this, we run a test server, and do the request.
 
 ```go
