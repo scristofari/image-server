@@ -1,4 +1,4 @@
-# Image manipulation
+# Part 3: Image manipulation and presets
 
 ## What's needed to be done.
 

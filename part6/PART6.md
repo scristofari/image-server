@@ -6,7 +6,7 @@
 
 ## Code
 
-### Timeout and Close request.
+### Timeout and Closed request.
 
 For timeout and closed request, we use the package context and goroutines.
 

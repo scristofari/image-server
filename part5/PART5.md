@@ -1,4 +1,4 @@
-# Part 5: Add providers
+# Part 5: Add storage providers
 
 ## What's needed to be done.
  - disk provider
