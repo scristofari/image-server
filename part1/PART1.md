@@ -12,7 +12,7 @@ There are all the libraries needed to build the project.
 ## Makefile
 
 Just to be have more "plug & play" commands. :)  
-The command "make dev", will build and run the project.  
+The command `make dev`, will build and run the project.  
 
 ## Source code
 
@@ -33,9 +33,9 @@ There're different ways to achieve that:
  - go run main.go  
  Will build and run the project.
 
- For more info, go to the [go-tooling-workshop](https://github.com/campoy/go-tooling-workshop/tree/master/2-building-artifacts)
+ For more info, go to the [go-tooling-workshop](https://github.com/campoy/go-tooling-workshop/tree/master/2-building-artifacts).
 
- ## Code
+ ## Code - Basic Router / Run server. 
 
  In this part, we use the build-in router in go.
 

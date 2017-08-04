@@ -16,25 +16,25 @@ This will be necessary to get the dependencies for this part.
 In this case, the router `gorilla/mux`.
 
 We just need to tap `dep init`
-A `vendor` folder will be created with the dependencies and 
-`Gopkg.toml` and `Gopkg.lock`.
+A `vendor` folder will be created with all the dependencies and 
+a `Gopkg.toml` + `Gopkg.lock` for locking the deps versions.
 
-## Code
+## Code: Dependencies / Read - Write file / Tests
 
 We define 2 routes:
 
-```
+```go
 	r.HandleFunc("/upload", uploadHandler).Methods("POST")
 	r.HandleFunc("/images/{img}", imageHandler).Methods("GET")
 ```
 
-One is for uploading the file, the other is to get the file.
+One is for uploading the file, the other is to get the file.  
 gorilla mux and the standart router use the same interface 
 described in PART1.
 
 Note that we use the `defer` statement there:
 
-```
+```go
 	defer image.Close()
 ```
 This will execute the function until the surrounding function returns.
@@ -42,7 +42,7 @@ I find this, must more readable than execute it at the end of the function.
 Note that, we close the image after we check if the `r.FormFile("image")` returns
 a error. if there's an error, the image can be nil and this will panic.
 
-At the end of the uploadHandler, we had the 201 http status code
+At the end of the uploadHandler, we add the 201 http status code
 It must be added before writing the response.
 
 ```
