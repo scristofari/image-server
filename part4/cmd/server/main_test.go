@@ -12,12 +12,8 @@ import (
 	"github.com/scristofari/image-server/part4/resizer"
 )
 
-var (
-	server *httptest.Server
-)
-
 func TestAccessToken(t *testing.T) {
-	server = httptest.NewServer(handlers())
+	var server = httptest.NewServer(handlers())
 	defer server.Close()
 
 	cases := []struct {
@@ -52,7 +48,7 @@ func TestAccessToken(t *testing.T) {
 }
 
 func TestUploadImageAuth(t *testing.T) {
-	server = httptest.NewServer(handlers())
+	var server = httptest.NewServer(handlers())
 	defer server.Close()
 
 	cases := []struct {

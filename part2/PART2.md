@@ -58,6 +58,8 @@ response.
 All the tests function must begin by Test... .
 
 ```
+func TestUploadImage(t *testing.T) {
+    ...
     r, err := http.NewRequest("GET", "http://localhost/images/golang.png", nil)
     ... 
     w := httptest.NewRecorder()
