@@ -9,7 +9,7 @@
 ## Dependency management tool
 
 As dependency management tool, we use the new
-golang tool `dep` which will ensure that all the dependencies 
+golang tool [dep](https://github.com/golang/dep) which will ensure that all the dependencies 
 of the project are correct.
 
 This will be necessary to get the dependencies for this part.
