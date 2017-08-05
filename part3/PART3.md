@@ -53,7 +53,7 @@ image on the filesystem, just render it, and add a max age header.
 ## Tests
 
 At the point, the tests will not change a lot.  
-We use `table driven tests, the benefit of that, is that we test a lot of cases at one time.
+We use `table driven tests`, the benefit of that, is that we test a lot of cases at one time.
 Very useful for testing the preset.
 
 ```go
