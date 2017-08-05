@@ -1,6 +1,6 @@
 # Part 5: Add storage providers
 
-## What's needed to be done.
+## What needs to be done.
  - disk provider
  - aws provider
 
