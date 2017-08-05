@@ -1,6 +1,6 @@
 # Image Server
 
-In this multi parts project, we will see how to implement a http service for 
+In this tutorial, we will see how to implement a http service for 
 uploading images, with presets and ready for the cloud.
 
 To goal is to have an image resizer with:
