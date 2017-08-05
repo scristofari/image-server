@@ -2,14 +2,14 @@
 
 ## What's need to be done.
 
-    - a upload url
+    - an upload url
     - a get image url
     - each image must be in a images folder
 
 ## Dependency management tool
 
 As dependency management tool, we use the new
-golang tool [dep](https://github.com/golang/dep) which will ensure that all the dependencies 
+golang tool [dep](https://github.com/golang/dep) which ensures that all dependencies 
 of the project are correct.
 
 This will be necessary to get the dependencies for this part.
@@ -28,7 +28,7 @@ We define 2 routes:
 	r.HandleFunc("/images/{img}", imageHandler).Methods("GET")
 ```
 
-One is for uploading the file, the other is to get the file.  
+The first one uploading the file, the other getting it.  
 [gorilla mux](https://github.com/gorilla/mux) and the standart router use the same interface 
 described in PART1.
 
@@ -38,11 +38,11 @@ Note that we use the `defer` statement there:
 	defer image.Close()
 ```
 This will execute the function until the surrounding function returns.
-I find this, must more readable than execute it at the end of the function.
-Note that, we close the image after we check if the `r.FormFile("image")` returns
+I find this, must more readable than executing it at the end of the function.
+Note that, we close the image after checking if the `r.FormFile("image")` returns
 a error. if there's an error, the image can be nil and this will panic.
 
-At the end of the uploadHandler, we add the 201 http status code
+At the end of the uploadHandler, we set the 201 http status code
 It must be added before writing the response.
 
 ```
