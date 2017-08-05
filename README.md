@@ -10,7 +10,7 @@ The purpose is to have an image resizer with these functionalities :
 
 Summary:
 
-- [Part 1 : Initialisation of the project](https://github.com/scristofari/image-server/blob/master/part1/PART1.md)
+- [Part 1 : Initiating the project](https://github.com/scristofari/image-server/blob/master/part1/PART1.md)
 
 features: docker, basic router, server
 
