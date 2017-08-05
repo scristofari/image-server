@@ -69,7 +69,6 @@ func uploadHandleFunc(w http.ResponseWriter, r *http.Request) {
 			close(rc)
 			return
 		default:
-			time.Sleep(2 * time.Second)
 			image, _, err := r.FormFile("image")
 			if err != nil {
 				rc <- imageResizerChan{err: err}
