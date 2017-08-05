@@ -2,16 +2,16 @@
 
 ## What's need to be done.
 
- - create a webserver which have a route which print `upload route`
+ - create a webserver which has a route which print `upload route`.
 
 ## Docker Image
 
-We will use the official docker image for golang.  
+We will use the official docker image for [golang](https://hub.docker.com/_/golang/).  
 There are all the libraries needed to build the project.  
 
 ## Makefile
 
-Just to be have more "plug & play" commands. :)  
+Just to be have more `plug & play` commands. :)  
 The command `make dev`, will build and run the project.  
 
 ## Source code
