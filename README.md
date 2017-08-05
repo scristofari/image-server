@@ -24,7 +24,7 @@ features: resize, image encoding/decoding, table driven tests
 
 - [Part 4: Secure the service with token](https://github.com/scristofari/image-server/blob/master/part4/PART4.md)
 
-features: basic auth, jwt, functionnal tests
+features: basic auth, jwt, functionnal tests, middlewares
 
 - [Part 5: Add storage providers](https://github.com/scristofari/image-server/blob/master/part5/PART5.md)
 
