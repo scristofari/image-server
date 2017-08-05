@@ -35,7 +35,7 @@ Like we only accept `png`, the generated filename will be:
 
 ### Resize and get the preset.
 
-The package used is [resize][github.com/nfnt/resize].  
+The package used is [resize](github.com/nfnt/resize).  
 The goal here, is to resize the image like the folllowing rules.
 
  - ?r=300x200, will resize the image with a width of 300 and a height of 200.  
@@ -53,7 +53,7 @@ image on the filesystem, just render it, and add a max age header.
 ## Tests
 
 At the point, the tests will not change a lot.  
-We use table driven tests, the benefit of that, is that we test a lot of cases at one time.
+We use `table driven tests, the benefit of that, is that we test a lot of cases at one time.
 Very useful for testing the preset.
 
 ```go
