@@ -1,8 +1,8 @@
-# Part 1 : Initialisation of the project
+# Part 1 : Initiating the project
 
 ## What's need to be done.
 
- - create a webserver which has a route which print `upload route`.
+ - create a webserver which has a route that prints `upload route`.
 
 ## Docker Image
 
@@ -11,12 +11,12 @@ There are all the libraries needed to build the project.
 
 ## Makefile
 
-Just to be have more `plug & play` commands. :)  
+Just to get more `plug & play` commands. :)  
 The command `make dev`, will build and run the project.  
 
 ## Source code
 
-In go, all the source code must be in the `GOPATH` and in a folder `src`.  
+In go, all the source code must be in the `GOPATH` in a folder `src`.  
 Elsewhere, it will be impossible to build the project.  
 Here, in the golang image, `GOPATH=/go`.  
 
@@ -25,10 +25,10 @@ Here, in the golang image, `GOPATH=/go`.
 There're different ways to achieve that:
 
  - go build .  
- Will build a binarie for the project.
+ Will build a binary for the project.
 
  - go install  
- Will build a binarie and place it in a `bin` folder
+ Will build a binary and place it in a `bin` folder
 
  - go run main.go  
  Will build and run the project.
@@ -37,7 +37,7 @@ There're different ways to achieve that:
 
  ## Code - Basic Router / Run server. 
 
- In this part, we use the build-in router in go.
+ In this part, we use build-in router in go.
 
  ```go
 r := http.NewServeMux()
