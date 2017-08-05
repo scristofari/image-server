@@ -1,6 +1,6 @@
 # Part 1 : Initiating the project
 
-## What's need to be done.
+## What needs to be done.
 
  - create a webserver which has a route that prints `upload route`.
 
