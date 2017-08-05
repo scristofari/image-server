@@ -1,6 +1,6 @@
 # Part 2: A minimalist web server to upload and get images.
 
-## What's need to be done.
+## What needs to be done.
 
     - an upload url
     - a get image url
