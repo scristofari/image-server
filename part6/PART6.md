@@ -1,8 +1,8 @@
 # Part 6: Deploy the project on a container service
 
-## What's needed to be done.
- - timeout and closed request for the request
- - deploy the container on Heroku.
+## What needs to be done.
+ - timeout and closed request
+ - deploy the container on Heroku
 
 ## Code
 
@@ -15,7 +15,7 @@ For timeout and closed request, we use the package context and goroutines.
 	defer cancel()
 ```
 
-In a select statement, if the timeout end or the request is closed. We finish it.
+In a select statement, if the timeout is reached or the request is closed. We finish it.
 
 ```go
 	for {
@@ -35,8 +35,8 @@ In a select statement, if the timeout end or the request is closed. We finish it
 In the Makefile, we add 2 new commands.  
 One is for the `multistage build` and the other is for the push on heroku.
 
-We use the multistage build, to have a tiny binarie ( from 300mo to 30mo )
-Must easier to deploy.
+We use the multistage build, to have a tiny binary ( from 300mo to 30mo )
+Much easier to deploy.
 
 ```go
 prod:
