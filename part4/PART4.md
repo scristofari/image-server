@@ -2,13 +2,13 @@
 
 ## What's needed to be done.
  - Add a new route which will give a token and be secure by a basic auth.
- - The token must have an expired date.
+ - The token must have an expiration date.
 
 ## Code
 
 ### Refactoring.
 
-The code in the main.go of part3 is greater, but adding a lot of new features will make it 
+The code in the main.go of part3 is longer, but adding a lot of new features will make it 
 more and more complex to read.
 
 We move all the `domain` features in a package named `resizer`. With the command `godoc`, we can have 
@@ -51,12 +51,12 @@ the api of the package.
     func GetQueryFromURL(u *url.URL) (*Query, error)
 ```
 
-As we want to use it for diffrents purpose, on cli, on the server, all the http things
+As we want to use it for differents purpose, on cli, on the server, all the http things
 remains in the `main.go`.
 
 ### Basic auth.
 
-To add this fonctionality, we can implement middlewares.  
+To add this feature, we can implement middlewares.  
 These are some `http.HandlerFunc` which can be chained.
 
 ```go
@@ -86,7 +86,7 @@ These are some `http.HandlerFunc` which can be chained.
 ### The token.
 
 For that, we use the [jwt-go](github.com/dgrijalva/jwt-go).  
-This package helps us to generate a token with a expire date of 1 minute.
+This package helps us to generate a token with a 1 min expiration date.
 
 ```go 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
@@ -94,8 +94,8 @@ This package helps us to generate a token with a expire date of 1 minute.
 	})
 ```
 
-For the validation, a middleware willl be added.  
-The same mecanic as the basic auth middleware.  
+For the validation, a middleware will be added.  
+It's the same mecanic as the basic auth middleware.  
 
 ```go
     func jwtHandlerFunc(f http.HandlerFunc) http.HandlerFunc {
@@ -127,8 +127,8 @@ The same mecanic as the basic auth middleware.
 
 ## Tests 
 
-We now change the tests to reflex the real calls, we need the router with all the middlewares.  
-For this, we run a test server, and do the request.
+We now change the tests to reflect the real calls, the middlewares need to be called from the router.  
+So we run a test server, and do the request.
 
 ```go
 	var server = httptest.NewServer(handlers())
