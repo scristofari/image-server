@@ -5,7 +5,7 @@ dev: build
 	docker run -it \
 	-v $(PWD):/go/src/github.com/scristofari/image-server/part6 \
 	-p 8080:8080 \
-	6-image-server:latest bash
+	--env-file .env 6-image-server:latest bash
 
 prod:
 	docker build -t 6-image-server:latest -f dockerfile.prod.yml .
