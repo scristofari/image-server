@@ -1,5 +1,5 @@
 build:
-	docker build -t 6-image-server .
+	docker build -t 6-image-server . -f dockerfile.dev.yml
 
 dev: build
 	docker run -it \
@@ -8,11 +8,11 @@ dev: build
 	--env-file .env 6-image-server:latest bash
 
 prod:
-	docker build -t 6-image-server:latest -f dockerfile.prod.yml .
+	docker build -t 6-image-server:latest .
 	docker run \
 	-p 8080:8080 \
 	--env-file .env 6-image-server:latest
 
-push: build
+push:
 	heroku container:login
 	heroku container:push web --app app-name
