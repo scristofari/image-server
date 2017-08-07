@@ -51,10 +51,13 @@ func (a *AWSProvider) Get(filename string) (io.ReadCloser, error) {
 	downloader := s3manager.NewDownloaderWithClient(svc)
 
 	buffer := &aws.WriteAtBuffer{}
-	downloader.Download(buffer, &s3.GetObjectInput{
+	_, err := downloader.Download(buffer, &s3.GetObjectInput{
 		Bucket: aws.String(os.Getenv("AWS_BUCKET")),
 		Key:    aws.String(filename),
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return aws.ReadSeekCloser(bytes.NewReader(buffer.Bytes())), nil
 }
